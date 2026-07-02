@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block sidebar_label %}Admin Panel{% endblock %}
+{% block sidebar %}
+  <a href="{{ url_for('admin.dashboard') }}" class="slink"><i class="fas fa-th-large"></i>Dashboard</a>
+  <a href="{{ url_for('admin.institutions') }}" class="slink"><i class="fas fa-university"></i>Institutions</a>
+  <a href="{{ url_for('admin.users') }}" class="slink active"><i class="fas fa-users"></i>Users</a>
+  <a href="{{ url_for('admin.certificates') }}" class="slink"><i class="fas fa-certificate"></i>Certificates</a>
+  <a href="{{ url_for('admin.blockchain_explorer') }}" class="slink"><i class="fas fa-cubes"></i>Blockchain</a>
+  <a href="{{ url_for('admin.logs') }}" class="slink"><i class="fas fa-list-alt"></i>Verify Logs</a>
+{% endblock %}
+{% block content %}
+<h2 class="page-title mb-4"><i class="fas fa-users me-2" style="color:var(--cyan);"></i>All Users ({{ users|length }})</h2>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th></tr></thead>
+      <tbody>
+      {% for u in users %}
+      <tr>
+        <td style="color:var(--muted);">{{ loop.index }}</td>
+        <td style="font-weight:600;">{{ u.name }}</td>
+        <td style="color:var(--muted);font-size:.82rem;">{{ u.email }}</td>
+        <td>
+          {% set role_colors = {'admin':'var(--cyan)','university':'var(--violet)','student':'var(--amber)','employer':'var(--green)'} %}
+          <span class="badge-chain" style="color:{{ role_colors.get(u.role,'var(--muted)') }};">{{ u.role|upper }}</span>
+        </td>
+        <td>{% if u.is_approved %}<span class="badge-ok">Active</span>
+            {% else %}<span class="badge-warn">Pending</span>{% endif %}</td>
+        <td style="color:var(--muted);font-size:.78rem;">{{ u.created_at.strftime('%d %b %Y') if u.created_at else '—' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="text-center py-5" style="color:var(--muted);">No users found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

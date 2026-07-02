@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<style>
+.hero{min-height:calc(100vh - 76px);display:flex;align-items:center;
+  background:radial-gradient(ellipse at 25% 60%,rgba(124,58,237,.16) 0%,transparent 55%),
+             radial-gradient(ellipse at 80% 20%,rgba(0,212,255,.1) 0%,transparent 50%);}
+.hero h1{font-family:var(--font);font-size:clamp(2.4rem,6vw,4.5rem);font-weight:800;line-height:1.05;}
+.hero h1 span{background:linear-gradient(120deg,var(--cyan),var(--violet));
+              -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.chain-demo{background:var(--card);border:1px solid var(--border);border-radius:12px;
+            padding:1rem 1.2rem;font-family:var(--mono);font-size:.72rem;color:var(--muted);}
+.chain-demo .blk-title{color:var(--cyan);font-weight:500;margin-bottom:.3rem;}
+.arrow-down{text-align:center;color:var(--violet);font-size:1.3rem;padding:.2rem 0;}
+.feat-icon{width:50px;height:50px;border-radius:12px;display:flex;align-items:center;
+           justify-content:center;font-size:1.2rem;margin-bottom:.9rem;}
+.step-num{width:34px;height:34px;min-width:34px;border-radius:50%;
+          background:linear-gradient(135deg,var(--cyan),var(--violet));
+          display:flex;align-items:center;justify-content:center;
+          font-family:var(--font);font-weight:800;font-size:.85rem;color:#ffffff;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);
+          display:inline-block;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+</style>
+
+<!-- HERO -->
+<section class="hero px-3">
+  <div class="container-xl">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <div class="badge-chain mb-3 d-inline-flex align-items-center gap-2">
+          <span class="live-dot"></span>
+          Blockchain-secured &middot; SHA-256 &middot; Real-time verification
+        </div>
+        <h1 class="mb-4">Certificate<br>Verification<br>Made <span>Simple</span></h1>
+        <p style="color:var(--muted);font-size:1.05rem;max-width:480px;margin-bottom:2rem;">
+          Universities issue certificates directly onto a blockchain. Students share them.
+          Employers check them in seconds &mdash; no phone calls, no paperwork.
+        </p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="{{ url_for('auth.register') }}" class="btn-cyan btn btn-lg px-4">
+            Get Started &nbsp;<i class="fas fa-arrow-right"></i>
+          </a>
+          <a href="{{ url_for('main.public_verify') }}" class="btn-outline-cyan btn btn-lg px-4">
+            <i class="fas fa-search me-2"></i>Check a Certificate
+          </a>
+        </div>
+        <div class="row mt-5 g-3">
+          {% for val, label, col in [
+            (stats.certificates, 'Certificates Issued', 'var(--cyan)'),
+            (stats.institutions, 'Universities Registered', 'var(--violet)'),
+            (stats.verifications, 'Times Verified', 'var(--green)'),
+          ] %}
+          <div class="col-4">
+            <div class="kpi-val" style="color:{{ col }};">{{ val }}</div>
+            <div style="color:var(--muted);font-size:.78rem;">{{ label }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="col-lg-5 offset-lg-1">
+        <div class="chain-demo">
+          <div class="blk-title">&#128230; Block #1 &mdash; First Certificate</div>
+          <div>Cert Hash &nbsp;: 0xa3f92d...8c7b1e</div>
+          <div>Issued by &nbsp;&nbsp;: IIT Hyderabad</div>
+          <div>Status &nbsp;&nbsp;&nbsp;&nbsp;: &#9989; Valid &middot; Nonce: 2847</div>
+        </div>
+        <div class="arrow-down">&#8645;</div>
+        <div class="chain-demo" style="border-color:rgba(124,58,237,.35);">
+          <div class="blk-title" style="color:var(--violet);">&#128230; Block #2</div>
+          <div>Cert Hash &nbsp;: 0x1b4e77...2f8a94</div>
+          <div>Issued by &nbsp;&nbsp;: JNTU Hyderabad</div>
+          <div>Status &nbsp;&nbsp;&nbsp;&nbsp;: &#9989; Valid &middot; Block confirmed</div>
+        </div>
+        <div class="arrow-down">&#8645;</div>
+        <div class="chain-demo" style="border-color:rgba(0,212,255,.3);">
+          <div class="blk-title">&#128230; Block #3 &mdash; Latest</div>
+          <div>Cert Hash &nbsp;: 0x9c3d18...4e5b82</div>
+          <div>TX &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: 0xf7a2c1...88d4e0</div>
+          <div>Status &nbsp;&nbsp;&nbsp;&nbsp;: &#9989; Recorded on chain</div>
+        </div>
+        <div class="text-center mt-2" style="font-size:.75rem;color:var(--amber);">
+          &#9881; Running on local blockchain &mdash; configure .env to connect Sepolia
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT IT DOES -->
+<section class="py-5 px-3" style="border-top:1px solid var(--border);background:rgba(255,255,255,.01);">
+  <div class="container-xl">
+    <h2 class="text-center mb-1" style="font-family:var(--font);font-weight:800;">What this system does</h2>
+    <p class="text-center mb-5" style="color:var(--muted);">Built to address fake certificate problems in academic hiring</p>
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 p-4">
+          <div class="feat-icon" style="background:rgba(0,212,255,.12);color:var(--cyan);"><i class="fas fa-shield-alt"></i></div>
+          <h6 style="font-family:var(--font);font-weight:700;margin-bottom:.4rem;">Can't be faked</h6>
+          <p style="color:var(--muted);font-size:.84rem;margin:0;">Each certificate gets a unique hash. Change even one character and the hash won't match &mdash; it shows up as invalid immediately.</p>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 p-4">
+          <div class="feat-icon" style="background:rgba(245,158,11,.12);color:var(--amber);"><i class="fas fa-bolt"></i></div>
+          <h6 style="font-family:var(--font);font-weight:700;margin-bottom:.4rem;">Fast verification</h6>
+          <p style="color:var(--muted);font-size:.84rem;margin:0;">Employers paste a certificate ID or scan a QR code. Result comes up right away &mdash; no waiting, no calls, no paperwork.</p>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 p-4">
+          <div class="feat-icon" style="background:rgba(124,58,237,.12);color:var(--violet);"><i class="fas fa-link"></i></div>
+          <h6 style="font-family:var(--font);font-weight:700;margin-bottom:.4rem;">Blockchain-backed</h6>
+          <p style="color:var(--muted);font-size:.84rem;margin:0;">Records are mined into a blockchain with proof-of-work. Nobody &mdash; not even the admin &mdash; can silently change them later.</p>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card h-100 p-4">
+          <div class="feat-icon" style="background:rgba(16,185,129,.12);color:var(--green);"><i class="fas fa-qrcode"></i></div>
+          <h6 style="font-family:var(--font);font-weight:700;margin-bottom:.4rem;">Easy sharing</h6>
+          <p style="color:var(--muted);font-size:.84rem;margin:0;">Students get a QR code per certificate. Put it on a resume, share on WhatsApp &mdash; whoever scans it can verify it on the spot.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="py-5 px-3">
+  <div class="container-xl">
+    <h2 class="text-center mb-5" style="font-family:var(--font);font-weight:800;">How it works</h2>
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="d-flex gap-3">
+          <div class="step-num">1</div>
+          <div>
+            <i class="fas fa-university mb-2 d-block" style="color:var(--cyan);font-size:1.4rem;"></i>
+            <h6 style="font-family:var(--font);font-weight:700;margin-bottom:.3rem;">University issues it</h6>
+            <p style="color:var(--muted);font-size:.83rem;margin:0;">The university fills in the student's details and clicks Issue. The system hashes the data and records a new block.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="d-flex gap-3">
+          <div class="step-num">2</div>
+          <div>
+            <i class="fas fa-cube mb-2 d-block" style="color:var(--violet);font-size:1.4rem;"></i>
+            <h6 style="font-family:var(--font);font-weight:700;margin-bottom:.3rem;">Block is saved</h6>
+            <p style="color:var(--muted);font-size:.83rem;margin:0;">The certificate hash and transaction info get stored permanently. Browse them anytime in the blockchain explorer.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="d-flex gap-3">
+          <div class="step-num">3</div>
+          <div>
+            <i class="fas fa-user-graduate mb-2 d-block" style="color:var(--amber);font-size:1.4rem;"></i>
+            <h6 style="font-family:var(--font);font-weight:700;margin-bottom:.3rem;">Student receives it</h6>
+            <p style="color:var(--muted);font-size:.83rem;margin:0;">Certificate appears in the student's dashboard with a QR code. Download it or share the verification link directly.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="d-flex gap-3">
+          <div class="step-num">4</div>
+          <div>
+            <i class="fas fa-building mb-2 d-block" style="color:var(--green);font-size:1.4rem;"></i>
+            <h6 style="font-family:var(--font);font-weight:700;margin-bottom:.3rem;">Employer checks it</h6>
+            <p style="color:var(--muted);font-size:.83rem;margin:0;">Scan the QR or type the certificate ID. The system checks the chain and returns whether it's valid or has been revoked.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-5 px-3" style="background:linear-gradient(135deg,rgba(124,58,237,.13),rgba(0,212,255,.08));border-top:1px solid var(--border);">
+  <div class="container text-center">
+    <h2 style="font-family:var(--font);font-weight:800;" class="mb-3">Want to try it out?</h2>
+    <p style="color:var(--muted);" class="mb-4">Register as a university, student, or employer and see how it works.</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="{{ url_for('auth.register') }}" class="btn-cyan btn btn-lg px-5">Create Account</a>
+      <a href="{{ url_for('main.blockchain_explorer') }}" class="btn-outline-cyan btn btn-lg px-4">View Blockchain</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

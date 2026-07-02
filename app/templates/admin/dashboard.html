@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block sidebar_label %}Admin Panel{% endblock %}
+{% block sidebar %}
+  <a href="{{ url_for('admin.dashboard') }}" class="slink active"><i class="fas fa-th-large"></i>Dashboard</a>
+  <a href="{{ url_for('admin.institutions') }}" class="slink"><i class="fas fa-university"></i>Institutions</a>
+  <a href="{{ url_for('admin.users') }}" class="slink"><i class="fas fa-users"></i>Users</a>
+  <a href="{{ url_for('admin.certificates') }}" class="slink"><i class="fas fa-certificate"></i>Certificates</a>
+  <a href="{{ url_for('admin.blockchain_explorer') }}" class="slink"><i class="fas fa-cubes"></i>Blockchain</a>
+  <a href="{{ url_for('admin.logs') }}" class="slink"><i class="fas fa-list-alt"></i>Verify Logs</a>
+{% endblock %}
+{% block content %}
+<h2 class="page-title mb-4"><i class="fas fa-th-large me-2" style="color:var(--cyan);"></i>Admin Dashboard</h2>
+
+<!-- KPI row -->
+<div class="row g-3 mb-4">
+  {% for val,label,icon,bg,col in [
+    (stats.total_users,'Total Users','fa-users','rgba(0,212,255,.12)','var(--cyan)'),
+    (stats.pending_universities,'Waiting Approval','fa-university','rgba(245,158,11,.12)','var(--amber)'),
+    (stats.total_certificates,'Certificates','fa-certificate','rgba(124,58,237,.12)','var(--violet)'),
+    (stats.total_verifications,'Verifications','fa-search','rgba(16,185,129,.12)','var(--green)'),
+    (stats.authentic_verifications,'Genuine','fa-check-circle','rgba(16,185,129,.12)','var(--green)'),
+    (stats.total_blocks,'Chain Blocks','fa-cubes','rgba(0,212,255,.1)','var(--cyan)'),
+  ] %}
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="kpi">
+      <div class="kpi-icon" style="background:{{ bg }};color:{{ col }};"><i class="fas {{ icon }}"></i></div>
+      <div class="kpi-val" style="color:{{ col }};">{{ val }}</div>
+      <div class="kpi-label">{{ label }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-4">
+  <!-- Pending approvals -->
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h6 class="mb-0" style="font-family:var(--font);font-weight:700;">
+          <i class="fas fa-clock me-2" style="color:var(--amber);"></i>Pending Approvals
+        </h6>
+        <span class="badge-warn">{{ pending_unis|length }}</span>
+      </div>
+      <div class="card-body p-0">
+        {% if pending_unis %}
+        {% for uni in pending_unis %}
+        <div class="d-flex align-items-center justify-content-between px-3 py-3"
+             style="border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-weight:600;font-size:.875rem;">{{ uni.institution_name }}</div>
+            <div style="color:var(--muted);font-size:.75rem;">{{ uni.user.email if uni.user else '—' }}</div>
+          </div>
+          <form method="POST" action="{{ url_for('admin.approve_university', uni_id=uni._id) }}">
+            <button class="btn btn-sm" style="background:var(--green);color:#ffffff;font-weight:600;">Approve</button>
+          </form>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="text-center py-4" style="color:var(--muted);">
+          <i class="fas fa-check-circle" style="color:var(--green);font-size:1.8rem;"></i>
+        <p class="mt-2 mb-0 small">Nothing pending right now.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Certs -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0" style="font-family:var(--font);font-weight:700;">
+          <i class="fas fa-certificate me-2" style="color:var(--cyan);"></i>Recent Certificates
+        </h6>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead><tr><th>Student</th><th>Degree</th><th>Institution</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>
+          {% for c in recent_certs %}
+          <tr>
+            <td style="font-weight:600;">{{ c.student_name }}</td>
+            <td style="color:var(--muted);">{{ c.degree }}</td>
+            <td style="color:var(--muted);font-size:.8rem;">{{ c.institution_name }}</td>
+            <td>{% if c.get('is_revoked') %}<span class="badge-bad">Revoked</span>
+                {% elif c.get('on_chain') %}<span class="badge-ok">On-Chain</span>
+                {% else %}<span class="badge-warn">Simulated</span>{% endif %}</td>
+            <td style="color:var(--muted);font-size:.78rem;">{{ c.issued_at.strftime('%d %b %Y') if c.issued_at else '—' }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="text-center py-4" style="color:var(--muted);">No certificates yet</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Logs -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0" style="font-family:var(--font);font-weight:700;">
+          <i class="fas fa-search me-2"></i>Recent Verification Logs
+        </h6>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead><tr><th>Verifier</th><th>Certificate ID</th><th>Result</th><th>Time</th></tr></thead>
+          <tbody>
+          {% for log in recent_logs %}
+          <tr>
+            <td>{{ log.verifier_name }}</td>
+            <td><span class="badge-chain">{{ log.certificate_id or '—' }}</span></td>
+            <td>
+              {% if log.result == 'authentic' %}<span class="badge-ok">✅ Authentic</span>
+              {% elif log.result == 'revoked' %}<span class="badge-bad">🚫 Revoked</span>
+              {% else %}<span class="badge-warn">⚠ {{ log.result|title }}</span>{% endif %}
+            </td>
+            <td style="color:var(--muted);font-size:.78rem;">{{ log.timestamp.strftime('%d %b %Y %H:%M') if log.timestamp else '—' }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="text-center py-4" style="color:var(--muted);">No verifications yet</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

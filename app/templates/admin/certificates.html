@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Certificates{% endblock %}
+{% block sidebar_label %}Admin Panel{% endblock %}
+{% block sidebar %}
+  <a href="{{ url_for('admin.dashboard') }}" class="slink"><i class="fas fa-th-large"></i>Dashboard</a>
+  <a href="{{ url_for('admin.institutions') }}" class="slink"><i class="fas fa-university"></i>Institutions</a>
+  <a href="{{ url_for('admin.users') }}" class="slink"><i class="fas fa-users"></i>Users</a>
+  <a href="{{ url_for('admin.certificates') }}" class="slink active"><i class="fas fa-certificate"></i>Certificates</a>
+  <a href="{{ url_for('admin.blockchain_explorer') }}" class="slink"><i class="fas fa-cubes"></i>Blockchain</a>
+  <a href="{{ url_for('admin.logs') }}" class="slink"><i class="fas fa-list-alt"></i>Verify Logs</a>
+{% endblock %}
+{% block content %}
+<h2 class="page-title mb-4"><i class="fas fa-certificate me-2" style="color:var(--cyan);"></i>All Certificates ({{ certificates|length }})</h2>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>Certificate ID</th><th>Student</th><th>Degree</th><th>Institution</th><th>Chain</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for c in certificates %}
+      <tr>
+        <td><span class="badge-chain">{{ c.certificate_id }}</span></td>
+        <td style="font-weight:600;font-size:.875rem;">{{ c.student_name }}</td>
+        <td style="color:var(--muted);font-size:.8rem;">{{ c.degree }}</td>
+        <td style="color:var(--muted);font-size:.8rem;">{{ c.institution_name }}</td>
+        <td>{% if c.get('on_chain') %}<span class="badge-ok">Sepolia</span>
+            {% else %}<span class="badge-warn">Simulated</span>{% endif %}</td>
+        <td>{% if c.get('is_revoked') %}<span class="badge-bad">Revoked</span>
+            {% else %}<span class="badge-ok">Active</span>{% endif %}</td>
+        <td>
+          {% if not c.get('is_revoked') %}
+          <form method="POST" action="{{ url_for('admin.revoke_certificate', cert_id=c.certificate_id) }}"
+                onsubmit="return confirm('Revoke this certificate on the blockchain?')">
+            <button class="btn btn-sm btn-outline-danger">Revoke</button>
+          </form>
+          {% else %}
+          <span style="color:var(--muted);font-size:.78rem;">Revoked</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="text-center py-5" style="color:var(--muted);">No certificates yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

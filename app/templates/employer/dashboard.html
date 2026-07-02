@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Employer Dashboard{% endblock %}
+{% block sidebar_label %}Employer{% endblock %}
+{% block sidebar %}
+  <a href="{{ url_for('employer.dashboard') }}" class="slink active"><i class="fas fa-th-large"></i>Dashboard</a>
+  <a href="{{ url_for('employer.verify') }}" class="slink"><i class="fas fa-search"></i>Verify Certificate</a>
+  <a href="{{ url_for('main.blockchain_explorer') }}" class="slink"><i class="fas fa-cubes"></i>Blockchain</a>
+{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <div>
+    <h2 class="page-title mb-1">Employer Dashboard</h2>
+    <p style="color:var(--muted);font-size:.875rem;margin:0;">
+      Verify academic credentials on the blockchain
+    </p>
+  </div>
+  <a href="{{ url_for('employer.verify') }}" class="btn-cyan btn">
+    <i class="fas fa-search me-2"></i>Verify New Certificate
+  </a>
+</div>
+
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+  {% for val, label, icon, bg, col in [
+    (stats.total,'Total Checks','fa-search','rgba(0,212,255,.12)','var(--cyan)'),
+    (stats.authentic,'Authentic','fa-check-circle','rgba(16,185,129,.12)','var(--green)'),
+    (stats.failed,'Invalid/NotFound','fa-times-circle','rgba(239,68,68,.12)','var(--red)'),
+  ] %}
+  <div class="col-4">
+    <div class="kpi">
+      <div class="kpi-icon" style="background:{{ bg }};color:{{ col }};"><i class="fas {{ icon }}"></i></div>
+      <div class="kpi-val" style="color:{{ col }};">{{ val }}</div>
+      <div class="kpi-label">{{ label }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Verification History -->
+<div class="card">
+  <div class="card-header">
+    <h6 class="mb-0" style="font-family:var(--font);font-weight:700;">
+      <i class="fas fa-history me-2" style="color:var(--cyan);"></i>Recent Verifications
+    </h6>
+  </div>
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>Certificate ID</th><th>Result</th><th>Date &amp; Time</th></tr></thead>
+      <tbody>
+      {% for log in logs %}
+      <tr>
+        <td>
+          {% if log.certificate_id %}
+          <a href="{{ url_for('main.public_verify') }}?cert_id={{ log.certificate_id }}"
+             class="badge-chain" style="text-decoration:none;">{{ log.certificate_id }}</a>
+          {% else %}
+          <span style="color:var(--muted);">—</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if log.result == 'authentic' %}<span class="badge-ok">✅ Authentic</span>
+          {% elif log.result == 'revoked' %}<span class="badge-bad">🚫 Revoked</span>
+          {% elif log.result == 'tampered' %}<span class="badge-bad">⚠ Tampered</span>
+          {% else %}<span class="badge-warn">❓ Not Found</span>{% endif %}
+        </td>
+        <td style="color:var(--muted);font-size:.8rem;">{{ log.timestamp.strftime('%d %b %Y · %H:%M') if log.timestamp else '—' }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="3" class="text-center py-5" style="color:var(--muted);">
+          No verifications yet.
+          <a href="{{ url_for('employer.verify') }}" style="color:var(--cyan);">Verify your first certificate →</a>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

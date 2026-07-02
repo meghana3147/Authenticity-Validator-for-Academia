@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<style>
+.auth-wrap{min-height:calc(100vh - 76px);display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 40% 60%,rgba(124,58,237,.12) 0%,transparent 60%);}
+.auth-box{width:100%;max-width:420px;}
+</style>
+<div class="auth-wrap px-3">
+  <div class="auth-box">
+    <div class="text-center mb-4">
+      <div style="font-size:2.8rem;margin-bottom:.5rem;">⛓</div>
+      <h2 style="font-family:var(--font);font-weight:800;">Sign in</h2>
+      <p style="color:var(--muted);font-size:.9rem;">Enter your email and password to continue</p>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('auth.login') }}">
+          <div class="mb-3">
+            <label class="form-label">Email Address</label>
+            <input type="email" name="email" class="form-control" placeholder="your@email.com" required/>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" placeholder="••••••••" required/>
+          </div>
+          <button type="submit" class="btn-cyan btn w-100 py-2">
+            Sign In &nbsp;<i class="fas fa-arrow-right"></i>
+          </button>
+        </form>
+        <hr class="my-3"/>
+        <p class="text-center mb-0" style="font-size:.85rem;color:var(--muted);">
+          No account yet? <a href="{{ url_for('auth.register') }}" style="color:var(--cyan);">Register here</a>
+        </p>
+      </div>
+    </div>
+    <p class="text-center mt-3" style="font-size:.8rem;">
+      <a href="{{ url_for('main.public_verify') }}" style="color:var(--muted);">
+        <i class="fas fa-search me-1"></i>Verify a certificate without logging in
+      </a>
+    </p>
+  </div>
+</div>
+{% endblock %}

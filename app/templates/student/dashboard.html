@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard{% endblock %}
+{% block sidebar_label %}Student{% endblock %}
+{% block sidebar %}
+  <a href="{{ url_for('student.dashboard') }}" class="slink active"><i class="fas fa-th-large"></i>My Certificates</a>
+  <a href="{{ url_for('main.public_verify') }}" class="slink"><i class="fas fa-search"></i>Verify Certificate</a>
+  <a href="{{ url_for('main.blockchain_explorer') }}" class="slink"><i class="fas fa-cubes"></i>Blockchain</a>
+{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <div>
+    <h2 class="page-title mb-1">My Certificates</h2>
+    <p style="color:var(--muted);font-size:.875rem;margin:0;">
+      <i class="fas fa-id-card me-1"></i>
+      Student ID: <strong style="font-family:var(--mono);color:var(--cyan);">{{ student.student_id if student else 'N/A' }}</strong>
+    </p>
+  </div>
+</div>
+
+{% if certificates %}
+<div class="row g-4">
+  {% for cert in certificates %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card h-100" style="border-color:{% if cert.get('is_revoked') %}rgba(239,68,68,.3){% elif cert.get('on_chain') %}rgba(16,185,129,.2){% else %}rgba(245,158,11,.2){% endif %};">
+      <div class="card-body p-4">
+        <!-- Status ribbon -->
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div style="font-size:2rem;">🎓</div>
+          {% if cert.get('is_revoked') %}<span class="badge-bad">Revoked</span>
+          {% elif cert.get('on_chain') %}<span class="badge-ok">On-Chain</span>
+          {% else %}<span class="badge-warn">Simulated</span>{% endif %}
+        </div>
+        <h6 style="font-family:var(--font);font-weight:700;margin-bottom:.3rem;">{{ cert.degree }}</h6>
+        {% if cert.get('major') %}
+        <div style="color:var(--muted);font-size:.82rem;margin-bottom:.3rem;">{{ cert.major }}</div>
+        {% endif %}
+        <div style="color:var(--muted);font-size:.8rem;margin-bottom:.75rem;">
+          {{ cert.get('institution_name','—') }} · {{ cert.graduation_year }}
+        </div>
+        <div class="badge-chain mb-3">{{ cert.certificate_id }}</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:1rem;">
+          Issued {{ cert.issued_at.strftime('%d %b %Y') if cert.issued_at else '—' }}
+        </div>
+        <a href="{{ url_for('student.certificate_detail', cert_id=cert.certificate_id) }}"
+           class="btn-outline-cyan btn w-100 btn-sm">
+          <i class="fas fa-qrcode me-2"></i>View & Share QR
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="card">
+  <div class="card-body text-center py-5">
+    <div style="font-size:4rem;margin-bottom:1rem;">🎓</div>
+    <h5 style="font-family:var(--font);font-weight:700;">No certificates yet</h5>
+    <p style="color:var(--muted);">
+      Once your university issues a certificate to your email, it'll show up here.
+    </p>
+    <a href="{{ url_for('main.public_verify') }}" class="btn-outline-cyan btn">
+      <i class="fas fa-search me-2"></i>Verify Existing Certificate
+    </a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

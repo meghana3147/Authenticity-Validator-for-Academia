@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}My Certificate{% endblock %}
+{% block sidebar_label %}Student{% endblock %}
+{% block sidebar %}
+  <a href="{{ url_for('student.dashboard') }}" class="slink"><i class="fas fa-th-large"></i>My Certificates</a>
+  <a href="{{ url_for('main.public_verify') }}" class="slink"><i class="fas fa-search"></i>Verify Certificate</a>
+  <a href="{{ url_for('main.blockchain_explorer') }}" class="slink"><i class="fas fa-cubes"></i>Blockchain</a>
+{% endblock %}
+{% block content %}
+<style>
+.cert-card{background:linear-gradient(135deg,#0f1629,#111d3c);border:1px solid rgba(0,212,255,.25);
+           border-radius:20px;padding:2.5rem;position:relative;overflow:hidden;}
+.cert-card::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;
+                   border-radius:50%;background:radial-gradient(rgba(124,58,237,.2),transparent);}
+.cert-card::after{content:'⛓';position:absolute;bottom:1rem;right:1.5rem;font-size:4rem;opacity:.05;}
+.cert-title{font-family:var(--font);font-size:1.8rem;font-weight:800;line-height:1.1;}
+.cert-seal{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--violet));
+           display:flex;align-items:center;justify-content:center;font-size:1.6rem;}
+.qr-box{background:white;border-radius:12px;padding:1rem;display:inline-block;}
+.info-pill{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;
+           padding:.6rem .9rem;font-size:.82rem;}
+</style>
+
+<div style="max-width:850px;">
+  <a href="{{ url_for('student.dashboard') }}" style="color:var(--muted);font-size:.85rem;">
+    ← Back to My Certificates
+  </a>
+
+  <!-- Visual Certificate Card -->
+  <div class="cert-card mt-3 mb-4">
+    <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+      <div>
+        <div style="font-size:.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:.5rem;">
+          Certificate of Achievement
+        </div>
+        <div class="cert-title mb-2">{{ cert.degree }}</div>
+        {% if cert.get('major') %}
+        <div style="color:var(--cyan);font-size:.95rem;margin-bottom:.3rem;">{{ cert.major }}</div>
+        {% endif %}
+        <div style="color:var(--muted);font-size:.875rem;">Awarded to</div>
+        <div style="font-family:var(--font);font-size:1.4rem;font-weight:700;margin-bottom:.5rem;">
+          {{ cert.student_name }}
+        </div>
+        <div style="color:var(--muted);font-size:.85rem;">
+          {{ cert.get('institution_name','—') }} &nbsp;·&nbsp; Class of {{ cert.graduation_year }}
+          {% if cert.get('cgpa') %}&nbsp;·&nbsp; CGPA {{ cert.cgpa }}{% endif %}
+        </div>
+      </div>
+      <div class="cert-seal">🎓</div>
+    </div>
+
+    <div class="d-flex gap-3 mt-3 flex-wrap">
+      {% if cert.get('is_revoked') %}
+      <span class="badge-bad" style="padding:.4rem 1rem;">🚫 Certificate Revoked</span>
+      {% elif cert.get('on_chain') %}
+      <span class="badge-ok" style="padding:.4rem 1rem;">✅ Verified on Sepolia Testnet</span>
+      {% else %}
+      <span class="badge-warn" style="padding:.4rem 1rem;">⚠ Simulated Blockchain</span>
+      {% endif %}
+      <span class="badge-chain">{{ cert.certificate_id }}</span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- QR Code -->
+    <div class="col-md-4">
+      <div class="card h-100 text-center p-4">
+        <h6 style="font-family:var(--font);font-weight:700;margin-bottom:1rem;">
+          <i class="fas fa-qrcode me-2" style="color:var(--cyan);"></i>Verification QR
+        </h6>
+        <div class="qr-box mx-auto mb-3">
+          <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="width:150px;height:150px;"/>
+        </div>
+        <p style="color:var(--muted);font-size:.78rem;margin-bottom:1rem;">
+          Share this QR with employers to instantly verify your certificate
+        </p>
+        <div style="background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);
+             border-radius:8px;padding:.5rem;font-family:var(--mono);font-size:.65rem;
+             word-break:break-all;color:var(--muted);">
+          {{ qr_url }}
+        </div>
+        {% if cert.get('file_path') %}
+        <a href="{{ url_for('student.download_certificate', cert_id=cert.certificate_id) }}"
+           class="btn-outline-cyan btn btn-sm mt-3 w-100">
+          <i class="fas fa-download me-2"></i>Download File
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Blockchain Details -->
+    <div class="col-md-8">
+      <div class="card mb-3">
+        <div class="card-header">
+          <h6 class="mb-0" style="font-family:var(--font);font-weight:700;">
+            <i class="fas fa-link me-2" style="color:var(--violet);"></i>Blockchain Proof
+          </h6>
+        </div>
+        <div class="card-body px-4 py-3">
+          {% for label, val in [
+            ('SHA-256 Hash', cert.cert_hash),
+            ('Transaction Hash', cert.tx_hash),
+            ('Block Number', cert.block_number|string),
+            ('Issuer Wallet', cert.issuer_wallet),
+          ] %}
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;
+                      padding:.55rem 0;border-bottom:1px solid var(--border);">
+            <span style="font-size:.72rem;color:var(--muted);text-transform:uppercase;
+                         letter-spacing:.5px;white-space:nowrap;margin-right:1rem;">{{ label }}</span>
+            <span class="hash" style="text-align:right;max-width:65%;">{{ val }}</span>
+          </div>
+          {% endfor %}
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;">
+            <span style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Network</span>
+            {% if cert.get('on_chain') %}
+            <span class="badge-ok">Ethereum Sepolia</span>
+            {% else %}
+            <span class="badge-warn">Simulated</span>
+            {% endif %}
+          </div>
+          {% if cert.get('on_chain') and cert.get('etherscan_url') %}
+          <div class="mt-3">
+            <a href="{{ cert.etherscan_url }}" target="_blank" class="btn-outline-cyan btn btn-sm">
+              <i class="fas fa-external-link-alt me-1"></i>View on Etherscan
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if chain_data and chain_data.get('live') %}
+      <div class="card" style="border-color:rgba(16,185,129,.25);">
+        <div class="card-header">
+          <h6 class="mb-0" style="font-family:var(--font);font-weight:700;color:var(--green);">
+            🔴 Live On-Chain Status
+          </h6>
+        </div>
+        <div class="card-body px-4 py-3">
+          <div class="d-flex gap-3 flex-wrap">
+            <div class="info-pill">
+              Exists: {% if chain_data.exists %}<strong style="color:var(--green);">Yes</strong>
+              {% else %}<strong style="color:var(--red);">No</strong>{% endif %}
+            </div>
+            <div class="info-pill">
+              Revoked: {% if chain_data.is_revoked %}<strong style="color:var(--red);">Yes</strong>
+              {% else %}<strong style="color:var(--green);">No</strong>{% endif %}
+            </div>
+            {% if chain_data.issued_at %}
+            <div class="info-pill">
+              Issued On-Chain: <strong>{{ chain_data.issued_at.strftime('%d %b %Y') }}</strong>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

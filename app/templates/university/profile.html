@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}University Profile{% endblock %}
+{% block sidebar_label %}University{% endblock %}
+{% block sidebar %}
+  <a href="{{ url_for('university.dashboard') }}" class="slink"><i class="fas fa-th-large"></i>Dashboard</a>
+  <a href="{{ url_for('university.issue_certificate') }}" class="slink"><i class="fas fa-plus-circle"></i>Issue Certificate</a>
+  <a href="{{ url_for('university.profile') }}" class="slink active"><i class="fas fa-cog"></i>Profile</a>
+  <a href="{{ url_for('main.blockchain_explorer') }}" class="slink"><i class="fas fa-cubes"></i>Blockchain</a>
+{% endblock %}
+{% block content %}
+<div style="max-width:620px;">
+  <h2 class="page-title mb-4"><i class="fas fa-cog me-2" style="color:var(--cyan);"></i>Institution Profile</h2>
+  <div class="card mb-3">
+    <div class="card-header">
+      <h6 class="mb-0" style="font-family:var(--font);font-weight:700;">Wallet Address (Blockchain Identity)</h6>
+    </div>
+    <div class="card-body px-4 py-3">
+      <div class="hash" style="font-size:.85rem;background:rgba(0,212,255,.05);
+           padding:.75rem 1rem;border-radius:8px;border:1px solid rgba(0,212,255,.15);">
+        {{ uni.wallet_address }}
+      </div>
+      <p style="color:var(--muted);font-size:.78rem;margin-top:.6rem;">
+        This wallet is used as your issuer identity on the smart contract.
+        Add it to MetaMask if you want to interact directly.
+      </p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <h6 class="mb-0" style="font-family:var(--font);font-weight:700;">Institution Details</h6>
+    </div>
+    <div class="card-body p-4">
+      <form method="POST">
+        <div class="mb-3">
+          <label class="form-label">Institution Name</label>
+          <input type="text" name="institution_name" class="form-control"
+                 value="{{ uni.institution_name }}" required/>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Website</label>
+          <input type="url" name="website" class="form-control"
+                 placeholder="https://youruni.edu"
+                 value="{{ uni.website or '' }}"/>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Address</label>
+          <textarea name="address" class="form-control" rows="2"
+                    placeholder="Institution physical address">{{ uni.get('address','') }}</textarea>
+        </div>
+        <button type="submit" class="btn-cyan btn px-4">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

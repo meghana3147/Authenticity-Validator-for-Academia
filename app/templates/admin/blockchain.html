@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Blockchain Explorer{% endblock %}
+{% block sidebar_label %}Admin Panel{% endblock %}
+{% block sidebar %}
+  <a href="{{ url_for('admin.dashboard') }}" class="slink"><i class="fas fa-th-large"></i>Dashboard</a>
+  <a href="{{ url_for('admin.institutions') }}" class="slink"><i class="fas fa-university"></i>Institutions</a>
+  <a href="{{ url_for('admin.users') }}" class="slink"><i class="fas fa-users"></i>Users</a>
+  <a href="{{ url_for('admin.certificates') }}" class="slink"><i class="fas fa-certificate"></i>Certificates</a>
+  <a href="{{ url_for('admin.blockchain_explorer') }}" class="slink active"><i class="fas fa-cubes"></i>Blockchain</a>
+  <a href="{{ url_for('admin.logs') }}" class="slink"><i class="fas fa-list-alt"></i>Verify Logs</a>
+{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <h2 class="page-title mb-0"><i class="fas fa-cubes me-2" style="color:var(--cyan);"></i>Blockchain Explorer</h2>
+  {% if live %}
+    <div class="d-flex gap-2 align-items-center">
+      <span class="badge-ok">🔴 Live Sepolia</span>
+      {% if chain_stats.get('live') %}<span class="badge-chain">{{ chain_stats.total_certificates }} on-chain</span>{% endif %}
+    </div>
+  {% else %}<span class="badge-warn">Simulated Mode</span>{% endif %}
+</div>
+
+{% for cert in certificates %}
+<div class="card mb-3" style="border-color:rgba(0,212,255,.12);">
+  <div class="card-body p-3">
+    <div class="row align-items-center g-2">
+      <div class="col-md-5">
+        <div style="color:var(--cyan);font-family:var(--font);font-weight:700;">📦 Block #{{ cert.block_number }}</div>
+        <div class="hash mt-1">TX: {{ cert.tx_hash }}</div>
+        <div class="hash">Hash: {{ cert.cert_hash[:40] }}…</div>
+      </div>
+      <div class="col-md-4">
+        <div style="font-weight:600;">{{ cert.student_name }}</div>
+        <div style="color:var(--muted);font-size:.8rem;">{{ cert.degree }} · {{ cert.institution_name }}</div>
+        <span class="badge-chain mt-1 d-inline-block">{{ cert.certificate_id }}</span>
+      </div>
+      <div class="col-md-3 text-md-end">
+        <div style="color:var(--muted);font-size:.78rem;">{{ cert.issued_at.strftime('%d %b %Y %H:%M') if cert.issued_at else '—' }}</div>
+        {% if cert.get('on_chain') %}<span class="badge-ok d-inline-block mt-1">Sepolia ✓</span>
+        {% else %}<span class="badge-warn d-inline-block mt-1">Simulated</span>{% endif %}
+        {% if cert.get('on_chain') and cert.get('etherscan_url') %}
+        <div class="mt-1"><a href="{{ cert.etherscan_url }}" target="_blank" style="color:var(--cyan);font-size:.73rem;">Etherscan ↗</a></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="text-center py-5" style="color:var(--muted);">
+  <i class="fas fa-cube" style="font-size:3rem;opacity:.3;"></i>
+  <p class="mt-3">No blockchain transactions yet.</p>
+</div>
+{% endfor %}
+{% endblock %}
